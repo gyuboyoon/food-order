@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import MealItem from "./MealItem.jsx";
+
 export default function Meals() {
   // 컴포넌트 함수를 async함수로 사용할 수 없다.
 
@@ -30,7 +32,7 @@ export default function Meals() {
   return (
     <ul id="meals">
       {loadedMeals.map((meal) => (
-        <li key={meal.id}>{meal.name}</li>
+        <MealItem key={meal.id} meal={meal} />
       ))}
     </ul>
   );
