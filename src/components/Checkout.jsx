@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useActionState } from "react";
 
 import Modal from "./UI/Modal.jsx";
 import CartContext from "../store/cartContext.jsx";
@@ -23,7 +23,7 @@ export default function Checkout() {
 
   const {
     data,
-    isLoading: isSending,
+    // isLoading: isSending, formAction 사용하면 상태를 수동으로 관리할 필요가 없다. 그래서 필요없어짐
     error,
     sendRequest,
     clearData,
@@ -43,14 +43,16 @@ export default function Checkout() {
     cartCtx.clearCart();
     clearData();
   }
+  async function checkoutAction(prevState, fd) {
+    // function checkoutAction(event) {
+    // event.preventDefault();
 
-  function handleSubmit(event) {
-    event.preventDefault();
+    // const fd = new FormData(event.target);
+    // const customerData = Object.fromEntries(fd.entries());
 
-    const fd = new FormData(event.target);
     const customerData = Object.fromEntries(fd.entries());
 
-    sendRequest(
+    await sendRequest(
       JSON.stringify({
         order: {
           items: cartCtx.items,
@@ -73,6 +75,8 @@ export default function Checkout() {
     // });
   }
 
+  const [formState, formAction, pending] = useActionState(checkoutAction, null);
+
   let actions = (
     <>
       <Button type="button" textOnly onClick={handleClose}>
@@ -82,7 +86,7 @@ export default function Checkout() {
     </>
   );
 
-  if (isSending) {
+  if (pending) {
     actions = <span>주문 내역을 보내는 중입니다.</span>;
   }
 
@@ -104,7 +108,7 @@ export default function Checkout() {
 
   return (
     <Modal open={userProgressCtx.progress === "checkout"} onClose={handleClose}>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <h2>결제하기</h2>
         <p>총 금액: {currencyFormatter.format(cartTotal)}</p>
 
